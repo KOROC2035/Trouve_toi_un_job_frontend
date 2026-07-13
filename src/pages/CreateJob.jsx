@@ -1,0 +1,202 @@
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+import { Briefcase, MapPin, DollarSign, List } from 'lucide-react';
+
+export default function CreateJob() {
+  const navigate = useNavigate();
+  const { token, isAuthenticated } = useContext(AuthContext);
+
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Les champs du formulaire
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    budget: '',
+    location: '',
+    category_id: ''
+  });
+
+  // 1. Récupérer les catégories au chargement de la page
+  useEffect(() => {
+    // Si l'utilisateur n'est pas connecté, on le redirige tout de suite
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/categories/');
+        setCategories(response.data);
+        // On sélectionne par défaut la première catégorie si elle existe
+        if (response.data.length > 0) {
+          setFormData(prev => ({ ...prev, category_id: response.data[0].id }));
+        }
+      } catch (err) {
+        setError('Impossible de charger les catégories.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [isAuthenticated, navigate]);
+
+  // Gestion des changements dans les inputs
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // 2. Envoyer le nouveau job au backend
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const payload = {
+        ...formData,
+        budget: parseFloat(formData.budget) // On s'assure que le budget est un nombre
+      };
+
+      await axios.post('http://localhost:8000/jobs/', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      // Si succès, on retourne à l'accueil pour voir la nouvelle annonce !
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.detail || "Erreur lors de la création de l'annonce.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className="text-center mt-20 text-gray-500 dark:text-gray-400 animate-pulse transition-colors">Chargement de l'éditeur...</div>;
+
+  return (
+    <div className="max-w-2xl mx-auto animate-fade-in transition-colors">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">Publier une nouvelle mission</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 transition-colors">Détaillez votre besoin pour trouver le meilleur prestataire.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 transition-colors">
+        
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-lg text-sm font-medium text-center transition-colors">
+            {error}
+          </div>
+        )}
+
+        {/* Titre */}
+        <div>
+          <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+            <Briefcase className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+            Titre de la mission
+          </label>
+          <input 
+            type="text" 
+            name="title"
+            required
+            value={formData.title}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+            placeholder="Ex: Développeur React pour un site e-commerce"
+          />
+        </div>
+
+        {/* Catégorie */}
+        <div>
+          <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+            <List className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+            Catégorie
+          </label>
+          <select
+            name="category_id"
+            value={formData.category_id}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white transition-colors"
+          >
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id} className="dark:bg-gray-900">{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Localisation & Budget (côte à côte) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+              <MapPin className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+              Lieu de la mission
+            </label>
+            <input 
+              type="text" 
+              name="location"
+              required
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              placeholder="Ex: Paris ou Remote"
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+              <DollarSign className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+              Budget estimé (€)
+            </label>
+            <input 
+              type="number" 
+              name="budget"
+              required
+              min="1"
+              value={formData.budget}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              placeholder="Ex: 500"
+            />
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+            Description détaillée
+          </label>
+          <textarea 
+            name="description"
+            required
+            rows="6"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+            placeholder="Décrivez précisément ce que vous attendez du prestataire..."
+          />
+        </div>
+
+        {/* Bouton de soumission */}
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 transition-colors">
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
+          >
+            {isSubmitting ? 'Publication en cours...' : 'Publier la mission'}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  );
+}
