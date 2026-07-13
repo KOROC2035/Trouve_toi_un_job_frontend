@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
     const fetchUser = async () => {
       if (token) {
         try {
-          const response = await axios.get('http://localhost:8000/users/me', {
+          const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUser(response.data);
