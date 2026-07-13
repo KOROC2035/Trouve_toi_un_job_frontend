@@ -32,7 +32,7 @@ export default function CreateJob() {
 
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/categories/');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/categories/`);
         setCategories(response.data);
         // On sélectionne par défaut la première catégorie si elle existe
         if (response.data.length > 0) {
