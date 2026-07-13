@@ -32,7 +32,7 @@ export default function CreateJob() {
 
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/categories/');
+        const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/categories/');
         setCategories(response.data);
         // On sélectionne par défaut la première catégorie si elle existe
         if (response.data.length > 0) {
@@ -65,7 +65,7 @@ export default function CreateJob() {
         budget: parseFloat(formData.budget) // On s'assure que le budget est un nombre
       };
 
-      await axios.post('http://localhost:8000/jobs/', payload, {
+      await axios.post('https://trouve-toi-un-job-backend.onrender.com/jobs/', payload, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

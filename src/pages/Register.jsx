@@ -27,7 +27,7 @@ export default function Register() {
     setError('');
 
     try {
-      await axios.post('http://localhost:8000/register', formData);
+      await axios.post('https://trouve-toi-un-job-backend.onrender.com/register', formData);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.detail || "Une erreur est survenue lors de l'inscription.");

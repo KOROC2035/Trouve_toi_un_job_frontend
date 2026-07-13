@@ -16,8 +16,8 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [jobsResponse, categoriesResponse] = await Promise.all([
-          axios.get('http://localhost:8000/jobs/'),
-          axios.get('http://localhost:8000/categories/')
+          axios.get('https://trouve-toi-un-job-backend.onrender.com/jobs/'),
+          axios.get('https://trouve-toi-un-job-backend.onrender.com/categories/')
         ]);
         setJobs(jobsResponse.data);
         setCategories(categoriesResponse.data);

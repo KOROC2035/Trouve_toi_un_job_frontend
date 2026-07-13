@@ -27,15 +27,15 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         if (user?.role === 'client' || user?.role === 'admin') {
-          const response = await axios.get('http://localhost:8000/users/me/jobs', {
+          const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me/jobs', {
             headers: { Authorization: `Bearer ${token}` }
           });
           setMyJobs(response.data);
         } 
         else if (user?.role === 'provider') {
           const [appsResponse, jobsResponse] = await Promise.all([
-            axios.get('http://localhost:8000/users/me/applications', { headers: { Authorization: `Bearer ${token}` } }),
-            axios.get('http://localhost:8000/jobs/')
+            axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me/applications', { headers: { Authorization: `Bearer ${token}` } }),
+            axios.get('https://trouve-toi-un-job-backend.onrender.com/jobs/')
           ]);
           setMyApplications(appsResponse.data);
           setAllJobs(jobsResponse.data);
@@ -55,7 +55,7 @@ export default function Dashboard() {
     setSelectedJob(job);
     setShowReviewForm(false);
     try {
-      const response = await axios.get(`http://localhost:8000/jobs/${job.id}/applications`, {
+      const response = await axios.get(`https://trouve-toi-un-job-backend.onrender.com/jobs/${job.id}/applications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setApplications(response.data);
@@ -67,12 +67,12 @@ export default function Dashboard() {
   const handleAccept = async (appId) => {
     if (!window.confirm("Accepter ce prestataire et démarrer la mission ?")) return;
     try {
-      await axios.patch(`http://localhost:8000/applications/${appId}/accept`, {}, {
+      await axios.patch(`https://trouve-toi-un-job-backend.onrender.com/applications/${appId}/accept`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Candidature acceptée ! La mission est maintenant en cours.");
       
-      const response = await axios.get('http://localhost:8000/users/me/jobs', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me/jobs', { headers: { Authorization: `Bearer ${token}` } });
       setMyJobs(response.data);
       viewApplications({ ...selectedJob, status: 'in_progress' });
     } catch (err) {
@@ -92,15 +92,15 @@ export default function Dashboard() {
     }
 
     try {
-      await axios.patch(`http://localhost:8000/jobs/${selectedJob.id}`, { status: 'completed' }, { headers: { Authorization: `Bearer ${token}` } });
-      await axios.post('http://localhost:8000/reviews/', {
+      await axios.patch(`https://trouve-toi-un-job-backend.onrender.com/jobs/${selectedJob.id}`, { status: 'completed' }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('https://trouve-toi-un-job-backend.onrender.com/reviews/', {
         job_id: selectedJob.id, reviewee_id: acceptedApp.provider_id, rating: parseInt(rating), comment: comment
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       alert("Mission terminée avec succès !");
       setShowReviewForm(false);
       
-      const response = await axios.get('http://localhost:8000/users/me/jobs', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me/jobs', { headers: { Authorization: `Bearer ${token}` } });
       setMyJobs(response.data);
       viewApplications({ ...selectedJob, status: 'completed' });
     } catch (err) {

@@ -26,7 +26,7 @@ export default function JobDetails() {
   useEffect(() => {
     const fetchJobDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/jobs/${id}`);
+        const response = await axios.get(`https://trouve-toi-un-job-backend.onrender.com/jobs/${id}`);
         setJob(response.data);
         // On pré-remplit le prix proposé avec le budget du client
         setProposedPrice(response.data.budget); 
@@ -53,7 +53,7 @@ export default function JobDetails() {
         proposed_price: parseFloat(proposedPrice)
       };
 
-      await axios.post('http://localhost:8000/applications/', payload, {
+      await axios.post('https://trouve-toi-un-job-backend.onrender.com/applications/', payload, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
