@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Briefcase, MapPin, DollarSign, List } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, List, Clock } from 'lucide-react';
 
 export default function CreateJob() {
   const navigate = useNavigate();
@@ -13,18 +13,16 @@ export default function CreateJob() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Les champs du formulaire
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     budget: '',
     location: '',
-    category_id: ''
+    category_id: '',
+    availability: ''
   });
 
-  // 1. Récupérer les catégories au chargement de la page
   useEffect(() => {
-    // Si l'utilisateur n'est pas connecté, on le redirige tout de suite
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -34,7 +32,6 @@ export default function CreateJob() {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/categories/`);
         setCategories(response.data);
-        // On sélectionne par défaut la première catégorie si elle existe
         if (response.data.length > 0) {
           setFormData(prev => ({ ...prev, category_id: response.data[0].id }));
         }
@@ -48,12 +45,10 @@ export default function CreateJob() {
     fetchCategories();
   }, [isAuthenticated, navigate]);
 
-  // Gestion des changements dans les inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 2. Envoyer le nouveau job au backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -62,7 +57,7 @@ export default function CreateJob() {
     try {
       const payload = {
         ...formData,
-        budget: parseFloat(formData.budget) // On s'assure que le budget est un nombre
+        budget: parseFloat(formData.budget)
       };
 
       await axios.post('https://trouve-toi-un-job-backend.onrender.com/jobs/', payload, {
@@ -72,7 +67,6 @@ export default function CreateJob() {
         }
       });
 
-      // Si succès, on retourne à l'accueil pour voir la nouvelle annonce !
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.detail || "Erreur lors de la création de l'annonce.");
@@ -90,7 +84,8 @@ export default function CreateJob() {
         <p className="text-gray-500 dark:text-gray-400 mt-2 transition-colors">Détaillez votre besoin pour trouver le meilleur prestataire.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 space-y-6 transition-colors">
+      {/* Remplacement de bg-gray-900 par brand-navy et des bordures par brand-navy-light */}
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-brand-navy p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-brand-navy-light space-y-6 transition-colors">
         
         {error && (
           <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-lg text-sm font-medium text-center transition-colors">
@@ -110,30 +105,49 @@ export default function CreateJob() {
             required
             value={formData.title}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-            placeholder="Ex: Développeur React pour un site e-commerce"
+            // focus:ring-blue-600 remplacé par focus:ring-brand-orange
+            className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+            placeholder="Ex: Développeur pour un site e-commerce"
           />
         </div>
 
-        {/* Catégorie */}
-        <div>
-          <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
-            <List className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-            Catégorie
-          </label>
-          <select
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white transition-colors"
-          >
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id} className="dark:bg-gray-900">{cat.name}</option>
-            ))}
-          </select>
+        {/* Catégorie & Disponibilité */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+              <List className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+              Catégorie
+            </label>
+            <select
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white transition-colors"
+            >
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id} className="dark:bg-brand-navy">{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
+              <Clock className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+              Disponibilité
+            </label>
+            <input 
+              type="text" 
+              name="availability"
+              required
+              value={formData.availability}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              placeholder="Ex: Dès que possible, Temps plein..."
+            />
+          </div>
         </div>
 
-        {/* Localisation & Budget (côte à côte) */}
+        {/* Localisation & Budget */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors">
@@ -146,7 +160,7 @@ export default function CreateJob() {
               required
               value={formData.location}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
               placeholder="Ex: Paris ou Remote"
             />
           </div>
@@ -163,7 +177,7 @@ export default function CreateJob() {
               min="1"
               value={formData.budget}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
               placeholder="Ex: 500"
             />
           </div>
@@ -180,17 +194,18 @@ export default function CreateJob() {
             rows="6"
             value={formData.description}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-brand-navy-light rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
             placeholder="Décrivez précisément ce que vous attendez du prestataire..."
           />
         </div>
 
         {/* Bouton de soumission */}
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 transition-colors">
+        <div className="pt-4 border-t border-gray-100 dark:border-brand-navy-light transition-colors">
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
+            // Remplacement des couleurs du bouton par le brand-orange
+            className="w-full bg-brand-orange hover:bg-brand-orange-hover text-white font-semibold py-3 rounded-xl transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
           >
             {isSubmitting ? 'Publication en cours...' : 'Publier la mission'}
           </button>

@@ -1,3 +1,13 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Charte graphique TrouveTonJob */
+  --color-brand-orange: #FF6600; /* L'orange vif du logo et des boutons */
+  --color-brand-orange-hover: #E55D00; /* Un orange légèrement plus sombre pour le hover */
+  
+  --color-brand-navy: #0B132B; /* Le bleu nuit très profond des t-shirts et fonds */
+  --color-brand-navy-light: #16203B; /* Un bleu nuit légèrement plus clair pour les cartes (mode sombre) */
+  --color-brand-navy-hover: #1A2744; /* Pour les survols d'éléments foncés */
+}
