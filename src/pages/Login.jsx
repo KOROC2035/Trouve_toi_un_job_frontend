@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   // État pour l'indicatif du pays (par défaut +225)
@@ -9,6 +10,7 @@ export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
   // Contexte d'authentification
@@ -95,14 +97,23 @@ export default function Login() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Mot de passe
           </label>
-          <input 
-            type="password" 
-            required 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white transition-all placeholder-gray-400"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"}
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white transition-all placeholder-gray-400 pr-10"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         <button 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { UserPlus, User, Briefcase, Camera, Image as ImageIcon } from 'lucide-react';
+import { UserPlus, User, Briefcase, Camera, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 
 const POPULAR_SPECIALTIES = [
   "Plombier",
@@ -20,6 +20,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // État pour l'indicatif du pays (par défaut +225)
   const [countryCode, setCountryCode] = useState('+225');
@@ -345,16 +346,25 @@ export default function Register() {
         {/* Mot de passe */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mot de passe</label>
-          <input 
-            type="password" 
-            name="password" 
-            required 
-            minLength={6} 
-            value={formData.password} 
-            onChange={handleChange} 
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white transition-colors placeholder-gray-400" 
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"}
+              name="password" 
+              required 
+              minLength={6} 
+              value={formData.password} 
+              onChange={handleChange} 
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-orange outline-none bg-transparent text-gray-900 dark:text-white transition-colors placeholder-gray-400 pr-10" 
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         <button type="submit" disabled={isSubmitting} className="w-full bg-brand-orange hover:bg-brand-orange-hover text-white font-medium py-3 rounded-xl transition-all shadow-sm flex justify-center items-center gap-2 mt-4 disabled:opacity-50">
