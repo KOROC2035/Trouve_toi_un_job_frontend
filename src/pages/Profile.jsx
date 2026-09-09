@@ -20,6 +20,20 @@ import {
   Loader2
 } from 'lucide-react';
 
+// Constante pour l'URL du backend
+const BACKEND_URL = 'https://trouve-toi-un-job-backend.onrender.com';
+
+// Fonction utilitaire pour gérer l'affichage correct des images (locales ou distantes)
+const getImageUrl = (path) => {
+  if (!path) return '';
+  // Si c'est déjà une URL absolue (ex: Cloudinary, S3, ou un lien direct), on la retourne telle quelle
+  if (path.startsWith('http')) return path;
+  
+  // Sinon, c'est un chemin local (ex: "uploads/image.jpg"), on ajoute l'URL du backend
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${BACKEND_URL}/${cleanPath}`;
+};
+
 export default function Profile() {
   const { token, user, setUser } = useContext(AuthContext);
   const [profileData, setProfileData] = useState(null);
@@ -43,7 +57,7 @@ export default function Profile() {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('https://trouve-toi-un-job-backend.onrender.com/users/me/profile', {
+      const response = await axios.get(`${BACKEND_URL}/users/me/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfileData(response.data);
@@ -75,7 +89,7 @@ export default function Profile() {
     uploadData.append('file', file);
 
     try {
-      const res = await axios.post('https://trouve-toi-un-job-backend.onrender.com/users/me/upload-image', uploadData, {
+      const res = await axios.post(`${BACKEND_URL}/users/me/upload-image`, uploadData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -96,7 +110,7 @@ export default function Profile() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      const response = await axios.put('https://trouve-toi-un-job-backend.onrender.com/users/me/profile', formData, {
+      const response = await axios.put(`${BACKEND_URL}/users/me/profile`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfileData(response.data);
@@ -168,7 +182,7 @@ export default function Profile() {
         <div className="h-48 sm:h-64 w-full bg-gradient-to-r from-brand-navy via-brand-navy-light to-brand-orange relative">
           {currentUser?.company_photo && (
             <img 
-              src={currentUser.company_photo} 
+              src={getImageUrl(currentUser.company_photo)} 
               alt="Couverture" 
               className="w-full h-full object-cover opacity-90" 
             />
@@ -185,7 +199,7 @@ export default function Profile() {
               <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl border-4 border-white dark:border-brand-navy bg-gray-100 dark:bg-brand-navy-light shadow-md overflow-hidden flex items-center justify-center text-gray-400">
                 {currentUser?.profile_photo ? (
                   <img 
-                    src={currentUser.profile_photo} 
+                    src={getImageUrl(currentUser.profile_photo)} 
                     alt={currentUser.first_name || "Avatar"} 
                     className="w-full h-full object-cover" 
                   />
@@ -348,7 +362,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   {formData.profile_photo && (
                     <img 
-                      src={formData.profile_photo} 
+                      src={getImageUrl(formData.profile_photo)} 
                       alt="Aperçu" 
                       className="w-12 h-12 rounded-xl object-cover border border-gray-200 dark:border-gray-700" 
                     />
@@ -380,7 +394,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   {formData.company_photo && (
                     <img 
-                      src={formData.company_photo} 
+                      src={getImageUrl(formData.company_photo)} 
                       alt="Aperçu couverture" 
                       className="w-16 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700" 
                     />
